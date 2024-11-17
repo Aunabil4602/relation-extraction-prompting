@@ -97,9 +97,15 @@ def report_score_avg(model_id, test_type, precision_list, recall_list, f1_list):
     n = len(precision_list)
     assert n > 0
 
+    logging.info("calculating avg over {n} files")
+
     avg_precision = sum(precision_list) / n
     avg_recall = sum(recall_list) / n
     avg_f1 = sum(f1_list) / n
+
+    logging.info(f'Combined Avg Precision: {avg_precision:.2f}\n')
+    logging.info(f'Combined Avg Recall: {avg_recall:.2f}\n')
+    logging.info(f'Combined Avg F1: {avg_f1:.2f}\n')
 
     output_file = 'result/' + get_simple_model_name(model_id) + '-' + test_type + '-' + get_current_date_time() + '.txt'
 

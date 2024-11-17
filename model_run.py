@@ -18,9 +18,9 @@ import util
 
 ####### Logging
 
-def setup_logger(model_id):
+def setup_logger(model_id, prompt_type):
 
-    log_file_name = 'log/' + util.get_simple_model_name(model_id) + '.log'
+    log_file_name = 'log/' + util.get_simple_model_name(model_id) + '-' + prompt_type + util.get_current_date_time() + '.log'
 
     logging.basicConfig(
         filename=log_file_name,  # Output file
@@ -73,7 +73,7 @@ def setup_model(model_id):
         max_new_tokens = 16
     )
 
-    logging.log(f"model downloaded or loaded from cache. time taken {time.time() - model_download_start_time}s")
+    logging.info(f"model downloaded or loaded from cache. time taken {time.time() - model_download_start_time}s")
 
     return pipe
 
@@ -95,11 +95,9 @@ def get_reply(pipe, prompt):
 
 ######## run
 
-def run(model_id, pipe):
+def run(model_id, pipe, prompt_type, prompt_details):
     logging.info(f"Running the model: {model_id}")
 
-    PROMPT_TYPE = '1_shots'
-    PROMPT_DETAILS = '_wo_rule'
     NO_RELATION = 'no_relation'
     PRINT_EVERY = 100
 
@@ -113,7 +111,7 @@ def run(model_id, pipe):
     f1_list = []
 
     for file in os.listdir('data'):
-        if file.endswith('.json') and PROMPT_TYPE in file:
+        if file.endswith('.json') and prompt_type in file and '160290' in file:
             file_path = os.path.join('data', file)
             data = util.read_json_file(file_path)
 
@@ -121,10 +119,12 @@ def run(model_id, pipe):
 
             logging.info(f"Started to run file: {file}")
 
-            for idx_episode, episode in enumerate( episodes):
-                prompt, query_relation, relation_list = util.build_prompt(episode, few_shot_type = PROMPT_TYPE + PROMPT_DETAILS)
+            total_episodes = len(episodes)
 
-                assert query_relation != NO_RELATION
+            for idx_episode, episode in enumerate( episodes):
+                prompt, query_relation, relation_list = util.build_prompt(episode, few_shot_type = prompt_type + prompt_details)
+
+                assert NO_RELATION not in relation_list
 
                 reply = get_reply(pipe, prompt)
 
@@ -141,10 +141,8 @@ def run(model_id, pipe):
                     current_time = time.time()
                     elapsed_time = current_time - time_start
 
-                    log_step_message = f"Episode: {idx_episode}, time passed: {elapsed_time:.2f} seconds"
-                    logging.log(log_step_message)
-
-                    break
+                    log_step_message = f"Episode: {idx_episode}/{total_episodes}, time passed: {(elapsed_time/60):.2f} mins"
+                    logging.info(log_step_message)
 
             logging.info(f"End running the file: {file}")
 
@@ -153,9 +151,15 @@ def run(model_id, pipe):
             recall_list.append(recall)
             f1_list.append(f1)
 
+            logging.info(f'Combined Avg Precision: {precision:.2f}\n')
+            logging.info(f'Combined Avg Recall: {recall:.2f}\n')
+            logging.info(f'Combined Avg F1: {f1:.2f}\n')
+
             util.report_per_file_results(model_id, full_data, file)
+
+            break
     
-    util.report_score_avg(model_id, PROMPT_TYPE + PROMPT_DETAILS, precision_list, recall_list, f1_list)
+    util.report_score_avg(model_id, prompt_type + prompt_details, precision_list, recall_list, f1_list)
 
     logging.info(f"Completed the model: {model_id}")
     
@@ -168,15 +172,17 @@ if __name__ == "__main__":
     # meta-llama/Llama-3.1-405B-Instruct-FP8
     # meta-llama/Llama-3.1-405B-Instruct
 
-    model_id = "meta-llama/Llama-3.2-3B-Instruct"
+    MODEL_ID = "meta-llama/Llama-3.1-70B-Instruct"
+    PROMPT_TYPE = '5_shots'
+    PROMPT_DETAILS = '_wo_rule'
 
-    setup_logger(model_id)
+    setup_logger(MODEL_ID, PROMPT_TYPE + PROMPT_DETAILS)
 
     logging.info("Application started.")
-    logging.info(f"Running for model: {model_id}")
+    logging.info(f"Running for model: {MODEL_ID}")
 
     do_authentication()
-    pipe = setup_model()
-    run(model_id, pipe)
+    pipe = setup_model(MODEL_ID)
+    run(MODEL_ID, pipe, PROMPT_TYPE, PROMPT_DETAILS)
 
     logging.info("Application end.")
