@@ -1,0 +1,3 @@
+nohup python -u model_run.py > output.log 2>&1 &
+
+# model names
