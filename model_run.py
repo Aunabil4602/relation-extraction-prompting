@@ -58,6 +58,8 @@ def do_authentication():
     # OpenAI
     # client = OpenAI()
 
+    logging.info("Authentication successfull")
+
 ######## models
 
 def setup_model(model_id):
@@ -151,9 +153,9 @@ def run(model_id, pipe, prompt_type, prompt_details):
             recall_list.append(recall)
             f1_list.append(f1)
 
-            logging.info(f'Combined Avg Precision: {precision:.2f}\n')
-            logging.info(f'Combined Avg Recall: {recall:.2f}\n')
-            logging.info(f'Combined Avg F1: {f1:.2f}\n')
+            logging.info(f'Avg Precision: {precision:.2f}\n')
+            logging.info(f'Avg Recall: {recall:.2f}\n')
+            logging.info(f'Avg F1: {f1:.2f}\n')
 
             util.report_per_file_results(model_id, full_data, file)
 
@@ -169,17 +171,18 @@ if __name__ == "__main__":
     # meta-llama/Llama-3.2-3B-Instruct
     # meta-llama/Llama-3.2-90B-Vision-Instruct
     # meta-llama/Llama-3.1-70B-Instruct
-    # meta-llama/Llama-3.1-405B-Instruct-FP8
-    # meta-llama/Llama-3.1-405B-Instruct
+    # # meta-llama/Llama-3.1-405B-Instruct-FP8 
+    # # meta-llama/Llama-3.1-405B-Instruct
 
     MODEL_ID = "meta-llama/Llama-3.1-70B-Instruct"
     PROMPT_TYPE = '5_shots'
-    PROMPT_DETAILS = '_wo_rule'
+    PROMPT_DETAILS = '_wo_rule_w_des' # _wo_rule_w_des, _wo_rule
 
     setup_logger(MODEL_ID, PROMPT_TYPE + PROMPT_DETAILS)
 
     logging.info("Application started.")
     logging.info(f"Running for model: {MODEL_ID}")
+    logging.info(f"Running for prompt_type: {PROMPT_TYPE + PROMPT_DETAILS}")
 
     do_authentication()
     pipe = setup_model(MODEL_ID)

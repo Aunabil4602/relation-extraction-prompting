@@ -13,7 +13,7 @@ def get_sentence_with_tags(meta_data):
 
     return ' '.join(token_with_tags)
 
-def setup_ways(ways, prompt):
+def setup_ways(ways, prompt, few_shot_type):
     relation_list = []
 
     for idx_way, way in enumerate(ways):
@@ -24,6 +24,9 @@ def setup_ways(ways, prompt):
         relation = way[0]['relation']
         prompt = prompt.replace(f'#RELATION_{idx_way}#', relation)
         relation_list.append(relation)
+
+        if '_w_des' in few_shot_type:
+            prompt = prompt.replace(f'#RELATION_DESCRIPTION_{idx_way}#', prompts.get_relation_description(relation))
 
         for idx_shot, shot in enumerate(way):
             idx_shot = idx_shot + 1
@@ -44,13 +47,13 @@ def setup_query(query, prompt):
 
     return prompt, query['relation']
 
-def build_prompt(episode, few_shot_type = '5W1S_WO_RULE'):
+def build_prompt(episode, few_shot_type = None):
     ways = episode['meta_train']
     query = episode['meta_test'][0]
 
     prompt = prompts.get_prompt_template(few_shot_type)
 
-    prompt, relation_list = setup_ways(ways, prompt)
+    prompt, relation_list = setup_ways(ways, prompt, few_shot_type)
     prompt, query_relation = setup_query(query, prompt)
 
     return prompt, query_relation, relation_list
@@ -73,6 +76,8 @@ def report_per_file_results(model_id, full_data, test_file):
     logging.info(f"reporting result for file: {test_file}")
 
     output_file = 'result/' + get_simple_model_name(model_id) + '-' + test_file + '-' + get_current_date_time() + '.txt'
+
+    logging.info(f'Logging results of the test set to file: {output_file}')
 
     with open(output_file, 'w+') as f:
         
@@ -108,6 +113,8 @@ def report_score_avg(model_id, test_type, precision_list, recall_list, f1_list):
     logging.info(f'Combined Avg F1: {avg_f1:.2f}\n')
 
     output_file = 'result/' + get_simple_model_name(model_id) + '-' + test_type + '-' + get_current_date_time() + '.txt'
+
+    logging.info(f'Logging avg results of all test sets to file: {output_file}')
 
     with open(output_file, 'w+') as f:
         f.write(model_id + '\n')
