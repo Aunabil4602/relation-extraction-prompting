@@ -175,8 +175,8 @@ if __name__ == "__main__":
     # # meta-llama/Llama-3.1-405B-Instruct
 
     MODEL_ID = "meta-llama/Llama-3.1-70B-Instruct"
-    PROMPT_TYPE = '5_shots'
-    PROMPT_DETAILS = '_wo_rule_w_des' # _wo_rule_w_des, _wo_rule
+    PROMPT_TYPE = '1_shots'
+    PROMPT_DETAILS = '_w_rule' # _wo_rule_w_des, _wo_rule, _w_rule
 
     setup_logger(MODEL_ID, PROMPT_TYPE + PROMPT_DETAILS)
 

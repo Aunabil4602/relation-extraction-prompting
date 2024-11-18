@@ -1,3 +1,5 @@
+import json
+
 PROMPT_TEMPLATE = dict()
 
 PROMPT_TEMPLATE['1_shots_wo_rule'] = '''Please choose the correct relation between the entities in the query sentence below. You can choose between five relations: #RELATION_LIST#. If none of the five relations are correct, choose no_relation.
@@ -18,6 +20,34 @@ Support sentence 1: #SUPPORT_SENTENCE_4_1#
 
 5. Relation “#RELATION_5#”
 Support sentence 1: #SUPPORT_SENTENCE_5_1#
+
+Query sentence: #QUERY_SENTENCE#
+
+Only output the correct relation, nothing else.'''
+
+PROMPT_TEMPLATE['1_shots_w_rule'] = '''Please choose the correct relation between the entities in the query sentence below. You can choose between five relations: #RELATION_LIST#. If none of the five relations are correct, choose no_relation.
+
+Here are some examples with rules for each of the five relations. A relation always connects a subject and object entity. We indicate the entities with <subject> and <object> tags.
+
+1. Relation “#RELATION_1#”
+Support sentence 1: #SUPPORT_SENTENCE_1_1#
+Rule for sentence 1: #RULE_SENTENCE_1_1#
+
+2. Relation “#RELATION_2#”
+Support sentence 1: #SUPPORT_SENTENCE_2_1#
+Rule for sentence 1: #RULE_SENTENCE_2_1#
+
+3. Relation “#RELATION_3#”
+Support sentence 1: #SUPPORT_SENTENCE_3_1#
+Rule for sentence 1: #RULE_SENTENCE_3_1#
+
+4. Relation “#RELATION_4#”
+Support sentence 1: #SUPPORT_SENTENCE_4_1#
+Rule for sentence 1: #RULE_SENTENCE_4_1#
+
+5. Relation “#RELATION_5#”
+Support sentence 1: #SUPPORT_SENTENCE_5_1#
+Rule for sentence 1: #RULE_SENTENCE_5_1#
 
 Query sentence: #QUERY_SENTENCE#
 
@@ -186,6 +216,9 @@ RELATION_DESCRIPTION = {
     "per:title": "a person's title",
 }
 
+with open('rules_map.json', 'r') as f:
+    RULE_MAP = json.load(f)
+
 def get_prompt_template(prompt_name):
     assert prompt_name in PROMPT_TEMPLATE.keys()
     
@@ -195,3 +228,10 @@ def get_relation_description(relation):
     assert relation in RELATION_DESCRIPTION.keys()
 
     return RELATION_DESCRIPTION[relation]
+
+def get_rule_for_sentence(idx):
+    assert idx in RULE_MAP
+
+    return RULE_MAP[idx]
+
+    

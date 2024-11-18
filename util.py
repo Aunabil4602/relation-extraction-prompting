@@ -36,6 +36,10 @@ def setup_ways(ways, prompt, few_shot_type):
             sentence = get_sentence_with_tags(shot)
             prompt = prompt.replace(f'#SUPPORT_SENTENCE_{idx_way}_{idx_shot}#', sentence)
 
+            if '_w_rule' in few_shot_type:
+                rule = prompts.get_rule_for_sentence(shot['id'])
+                prompt = prompt.replace(f'#RULE_SENTENCE_{idx_way}_{idx_shot}#', rule)
+
     prompt = prompt.replace('#RELATION_LIST#', ', '.join(relation_list))
 
     return prompt, relation_list
